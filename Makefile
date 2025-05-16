@@ -76,6 +76,7 @@ vcs:
 	@$(MAKE) run-vcs
 
 tag: .next-version vcs
+	git status
 	# git tag $(shell cat $<)
 
 ## tag-and-push: Tag, and push version
