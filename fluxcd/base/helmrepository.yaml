@@ -1,0 +1,10 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: my-charts
+  namespace: flux-system
+spec:
+  interval: 1m0s
+  url: https://github.com/my-org/my-charts
+  ref:
+    tag: v1.2.3   # <- specific Git tag

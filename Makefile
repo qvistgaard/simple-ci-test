@@ -1,4 +1,4 @@
-COMPONENTS := ci/maven ci/helm
+COMPONENTS := ci/maven ci/helm ci/fluxcd
 CONFIG ?= Makefile.config.mk
 # Each component should provide its own file, e.g., maven.mk
 INSTALL_COMPONENTS := $(foreach c,$(COMPONENTS),$(c))

@@ -1,9 +1,5 @@
 .PHONY: version-apply
 
-publish:
-	#
-	echo "PUBLISH"
-
 vcs:
 	#
 	echo "VCS"

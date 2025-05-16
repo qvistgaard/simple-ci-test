@@ -1,0 +1,17 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: curator
+spec:
+  chart:
+    spec:
+      chart: curator
+      sourceRef:
+        kind: HelmRepository
+        name: charts-pelicanlabs-io
+      version: 0.215.1
+  interval: 1m0s
+  install:
+    disableWait: true
+  upgrade:
+    disableWait: true
