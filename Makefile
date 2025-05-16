@@ -36,7 +36,7 @@ run-%: .next-version
 ## version-generate: Compute the next semantic version
 version-generate: .next-version
 .next-version:
-	./git-semver next > .next-version
+	git-semver next > .next-version
 
 
 ## changelog: Compute the next semantic version
