@@ -104,7 +104,7 @@ tag-and-push: tag CHANGELOG.md
 	# git commit CHANGELOG.md -m"updated changelog"
 
 oci-login:
-	exit 1;
+	# exit 1;
 
 clean:
 	@$(MAKE) run-clean
