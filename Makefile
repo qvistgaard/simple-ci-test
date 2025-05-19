@@ -47,24 +47,18 @@ run-%: .next-version
 ## version-generate: Compute the next semantic version
 version-generate: .next-version
 .next-version:
-	@echo "🔍 Checking for version changes..."
+	@echo "Checking for version changes..."
 	@LATEST_TAG=$$(git tag --sort=-v:refname | grep '^v' | head -n 1 || echo v0.0.0); \
-	RAW_TAG=$${LATEST_TAG#v}; \
-	NEXT_VERSION=$$(./gsemver bump); \
-	RAW_NEXT=$${NEXT_VERSION#v}; \
+	NEXT_VERSION=$$(./gsemver bump $(GSEMVER_BUMP_FLAGS)); \
 	echo "Latest Git tag:    $$LATEST_TAG"; \
 	echo "Next candidate:    $$NEXT_VERSION"; \
-	if [ "$$RAW_TAG" = "$$RAW_NEXT" ]; then \
+	if [ "v$$NEXT_VERSION" = "$$LATEST_TAG" ]; then \
 	  echo "❌ No version bump detected. Nothing to release."; \
 	  exit 1; \
 	else \
 	  echo "✅ Version bump detected: $$NEXT_VERSION"; \
+	  echo $$NEXT_VERSION > $@; \
 	fi
-
-	# git tag --sort=-v:refname | grep '^v' | head -n 1
-	# $(GSEMVER) bump $(GSEMVER_BUMP_FLAGS) > .next-version
-	# echo $(shell cat .next-version)
-
 
 ## changelog: Compute the next semantic version
 changelog: CHANGELOG.md
