@@ -41,6 +41,7 @@ run-%: .next-version
 version-generate: .next-version
 .next-version:
 	$(GIT_SEMVER_EXECUTABLE) next > .next-version
+	echo $(shell cat .next-version)
 
 
 ## changelog: Compute the next semantic version
