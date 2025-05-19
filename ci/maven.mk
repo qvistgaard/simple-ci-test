@@ -61,3 +61,5 @@ vcs:
 		echo "ERROR: ❌ pom.xml.versionsBackup is missing from .gitignore"; \
 		exit 1; \
 	}
+
+

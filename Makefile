@@ -2,8 +2,8 @@ WITH_CONFIG ?= config.mk
 
 -include $(WITH_CONFIG)
 
-GIT_CHGLOG_EXECUTABLE?=git-chglog
-GIT_SEMVER_EXECUTABLE?=git-semver
+GIT_CHGLOG_EXECUTABLE?=./git-chglog
+GIT_SEMVER_EXECUTABLE?=./git-semver
 
 
 .PHONY: help all build test package deploy release
@@ -76,13 +76,14 @@ publish: oci-login quality-scan tag-and-push
 	@$(MAKE) run-publish
 
 ## tag-and-push: Tag, and push version
-vcs:
+vcs: .next-version
 	@$(MAKE) run-vcs
+	git commit -a -m"Updated for next verion $(shell cat $<)"
 
 tag: .next-version vcs
-
-	# git status
-	# git tag $(shell cat $<)
+	git tag $(shell cat $<)
+	$(MAKE) -B .next-version
+	$(MAKE) vcs
 
 ## tag-and-push: Tag, and push version
 tag-and-push: tag CHANGELOG.md
