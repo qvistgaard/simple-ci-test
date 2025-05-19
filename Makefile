@@ -5,6 +5,17 @@ WITH_CONFIG ?= config.mk
 GIT_CHGLOG_EXECUTABLE?=./git-chglog
 GIT_SEMVER_EXECUTABLE?=./git-semver
 
+GSEMVER?=./gsermver
+GSEMVER_FLAGS=
+GSEMVER_BUMP_FLAGS=
+
+ifeq ($(WITH_PRE_RELEASE),true)
+  GSEMVER_BUMP_FLAGS := --pre-release alpha
+endif
+
+ifdef CRANE_AUTH
+  # CRANE_FLAGS += --auth=$(CRANE_AUTH)
+endif
 
 .PHONY: help all build test package deploy release
 
@@ -83,7 +94,8 @@ vcs: .next-version
 
 tag: .next-version vcs
 	git tag $(shell cat $<)
-	$(MAKE) -B .next-version
+	$(MAKE) -B .next-version WITH_PRE_RELEASE=true
+	$(MAKE) version-apply
 	$(MAKE) vcs
 
 ## tag-and-push: Tag, and push version
@@ -92,7 +104,7 @@ tag-and-push: tag CHANGELOG.md
 	# git commit CHANGELOG.md -m"updated changelog"
 
 oci-login:
-
+	exit 1;
 
 clean:
 	@$(MAKE) run-clean

@@ -1,3 +1,5 @@
 crane
 yq
 java
+
+https://github.com/arnaud-deprez/gsemver
