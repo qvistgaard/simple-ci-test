@@ -10,7 +10,7 @@ GSEMVER_FLAGS=
 GSEMVER_BUMP_FLAGS=
 
 ifeq ($(WITH_PRE_RELEASE),true)
-  GSEMVER_BUMP_FLAGS := --pre-release alpha
+  GSEMVER_BUMP_FLAGS := patch --pre-release alpha
 endif
 
 ifdef CRANE_AUTH
