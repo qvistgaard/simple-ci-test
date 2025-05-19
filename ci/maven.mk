@@ -30,8 +30,13 @@ define tarball_path
 	$(if $(filter $(MAVEN_JIB_ROOT_IMAGE_NAME),$(1)),target/jib-image.tar,$(1)/target/jib-image.tar)
 endef
 
+.PHONY: build test clean
+
+build:
+	$(MAVEN_EXECUTABLE) $(MAVEN_FLAGS) compile
+
 test:
-	$(MAVEN_EXECUTABLE) $(MAVEN_FLAGS)  test
+	$(MAVEN_EXECUTABLE) $(MAVEN_FLAGS) test
 
 clean:
 	$(MAVEN_EXECUTABLE) clean
@@ -42,7 +47,7 @@ package-%:
 	$(MAVEN_EXECUTABLE) $(MAVEN_FLAGS) jib:buildTar
 
 package-maven:
-	$(MAVEN_EXECUTABLE) $(MAVEN_FLAGS)  package
+	$(MAVEN_EXECUTABLE) $(MAVEN_FLAGS) -DskipTests package
 
 # Push tarball using crane
 publish-%:

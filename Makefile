@@ -13,10 +13,6 @@ ifeq ($(WITH_PRE_RELEASE),true)
   GSEMVER_BUMP_FLAGS := patch --pre-release alpha
 endif
 
-ifdef CRANE_AUTH
-  # CRANE_FLAGS += --auth=$(CRANE_AUTH)
-endif
-
 .PHONY: help all build test package deploy release
 
 ## help: Show this help
@@ -61,10 +57,12 @@ CHANGELOG.md:
 	$(GIT_CHGLOG_EXECUTABLE) --output $@
 
 ## all: Run full pipeline: build + release + deploy
-all: build package publish
+all: build package
+
+ci: version-apply package publish
 
 ## build: Generate version, apply it, test, and package
-build: version-apply
+build:
 	@$(MAKE) run-build
 
 ## version-apply: Apply version to all components
@@ -73,7 +71,7 @@ version-apply:
 
 ## test: Run tests on all components
 test: build
-	@$(MAKE) run-build
+	@$(MAKE) run-test
 
 ## package: Run Maven packaging
 package: test
@@ -94,9 +92,9 @@ vcs: .next-version
 
 tag: .next-version vcs
 	git tag $(shell cat $<)
-	$(MAKE) -B .next-version WITH_PRE_RELEASE=true
-	$(MAKE) version-apply
-	$(MAKE) vcs
+	$(MAKE) -B .next-version WITH_PRE_RELEASE=true WITH_CONFIG=$(WITH_CONFIG)
+	$(MAKE) version-apply WITH_CONFIG=$(WITH_CONFIG)
+	$(MAKE) vcs WITH_CONFIG=$(WITH_CONFIG)
 
 ## tag-and-push: Tag, and push version
 tag-and-push: tag CHANGELOG.md
