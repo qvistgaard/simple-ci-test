@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.source2sea</groupId>
     <artifactId>simple-ci</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <name>simple-ci</name>
     <description>simple-ci</description>
     <url/>
@@ -47,6 +47,25 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>3.4.5</version>
+                <executions>
+                    <execution>
+                        <id>build-image-tarball</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>buildTar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <to>
+                        <image>mycompany/my-spring-app</image> <!-- customize as needed -->
+                    </to>
+                </configuration>
             </plugin>
         </plugins>
     </build>

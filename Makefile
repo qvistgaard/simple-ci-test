@@ -1,5 +1,9 @@
-COMPONENTS := ci/maven ci/helm ci/fluxcd
+COMPONENTS := ci/helm ci/fluxcd
 CONFIG ?= Makefile.config.mk
+
+GIT_CHGLOG_EXECUTABLE?=git-chglog
+GIT_SEMVER_EXECUTABLE?=git-semver
+
 # Each component should provide its own file, e.g., maven.mk
 INSTALL_COMPONENTS := $(foreach c,$(COMPONENTS),$(c))
 
@@ -17,6 +21,7 @@ help:
 
 define run_component_targets
 	@for t in $(1); do \
+	  set -e; \
 	  if make -q -f $${t}.mk $(2) >/dev/null 2>&1 || make -n -f $${t}.mk $(2) >/dev/null 2>&1; then \
 	  	echo "\033[32m🚀 Running component: $${t}.mk with target: $(2)\033[0m"; \
 	    echo $(MAKE) -f $${t}.mk $(2) CONFIG=$(CONFIG) $(3); \
@@ -36,13 +41,13 @@ run-%: .next-version
 ## version-generate: Compute the next semantic version
 version-generate: .next-version
 .next-version:
-	git-semver next > .next-version
+	$(GIT_SEMVER_EXECUTABLE) next > .next-version
 
 
 ## changelog: Compute the next semantic version
 changelog: CHANGELOG.md
 CHANGELOG.md:
-	./git-chglog --output $@
+	$(GIT_CHGLOG_EXECUTABLE) --output $@
 
 ## all: Run full pipeline: build + release + deploy
 all: build package publish
@@ -57,7 +62,7 @@ version-apply:
 
 ## test: Run tests on all components
 test: build
-	@$(MAKE) run-test
+	@$(MAKE) run-build
 
 ## package: Run Maven packaging
 package: test

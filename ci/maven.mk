@@ -1,14 +1,29 @@
+MAVEN_WRAPPER_SCRIPT ?= ./mvnw
+MAVEN_FLAGS ?= --batch-mode
+
+ifeq ($(wildcard $(MAVEN_WRAPPER_SCRIPT)),)
+	MAVEN_EXECUTABLE ?= $(shell which mvn)
+else
+	MAVEN_EXECUTABLE ?= $(MAVEN_WRAPPER_SCRIPT)
+endif
+
 test:
-	mvn test --batch-mode
+	$(MAVEN_EXECUTABLE) test --batch-mode
 
 clean:
-	mvn clean
+	$(MAVEN_EXECUTABLE) clean
 
 package:
-	mvn package --batch-mode -Ddocker-repository=$(docker-repository)
+	$(MAVEN_EXECUTABLE) package --batch-mode -Ddocker-repository=$(docker-repository)
 
 quality-scan:
-	# mvn sonar:sonar --batch-mode -Dsonar.host.url=$(sonarqube-url) -Dsonar.token=$(sonarqube-token)
+	# $(MAVEN_EXECUTABLE) sonar:sonar --batch-mode -Dsonar.host.url=$(sonarqube-url) -Dsonar.token=$(sonarqube-token)
 
 version-apply:
-	mvn versions:set -DnewVersion=$(VERSION)
+	$(MAVEN_EXECUTABLE) versions:set -DnewVersion=$(VERSION)
+
+vcs:
+	@grep -Fxq "pom.xml.versionsBackup" .gitignore || { \
+		echo "ERROR: ❌ pom.xml.versionsBackup is missing from .gitignore"; \
+		exit 1; \
+	}

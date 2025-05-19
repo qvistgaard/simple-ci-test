@@ -7,4 +7,4 @@ spec:
   interval: 1m0s
   url: https://github.com/my-org/my-charts
   ref:
-    tag: v1.2.3   # <- specific Git tag
+    tag: "" # <- specific Git tag

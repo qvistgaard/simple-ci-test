@@ -9,7 +9,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: charts-pelicanlabs-io
-      version: 0.215.1
+      version: ""
   interval: 1m0s
   install:
     disableWait: true
