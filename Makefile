@@ -5,7 +5,7 @@ WITH_CONFIG ?= config.mk
 GIT_CHGLOG_EXECUTABLE?=./git-chglog
 GIT_SEMVER_EXECUTABLE?=./git-semver
 
-GSEMVER?=./gsermver
+GSEMVER?=./gsemver
 GSEMVER_FLAGS=
 GSEMVER_BUMP_FLAGS=
 
@@ -51,7 +51,7 @@ run-%: .next-version
 ## version-generate: Compute the next semantic version
 version-generate: .next-version
 .next-version:
-	$(GIT_SEMVER_EXECUTABLE) next > .next-version
+	$(GSEMVER) bump $(GSEMVER_BUMP_FLAGS) > .next-version
 	echo $(shell cat .next-version)
 
 
