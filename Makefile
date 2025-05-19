@@ -47,8 +47,23 @@ run-%: .next-version
 ## version-generate: Compute the next semantic version
 version-generate: .next-version
 .next-version:
-	$(GSEMVER) bump $(GSEMVER_BUMP_FLAGS) > .next-version
-	echo $(shell cat .next-version)
+	@echo "🔍 Checking for version changes..."
+	@LATEST_TAG=$$(git tag --sort=-v:refname | grep '^v' | head -n 1 || echo v0.0.0); \
+	RAW_TAG=$${LATEST_TAG#v}; \
+	NEXT_VERSION=$$(./gsemver bump); \
+	RAW_NEXT=$${NEXT_VERSION#v}; \
+	echo "Latest Git tag:    $$LATEST_TAG"; \
+	echo "Next candidate:    $$NEXT_VERSION"; \
+	if [ "$$RAW_TAG" = "$$RAW_NEXT" ]; then \
+	  echo "❌ No version bump detected. Nothing to release."; \
+	  exit 1; \
+	else \
+	  echo "✅ Version bump detected: $$NEXT_VERSION"; \
+	fi
+
+	# git tag --sort=-v:refname | grep '^v' | head -n 1
+	# $(GSEMVER) bump $(GSEMVER_BUMP_FLAGS) > .next-version
+	# echo $(shell cat .next-version)
 
 
 ## changelog: Compute the next semantic version
@@ -59,7 +74,7 @@ CHANGELOG.md:
 ## all: Run full pipeline: build + release + deploy
 all: build package
 
-ci: version-apply package publish
+ci: version-apply tag
 
 ## build: Generate version, apply it, test, and package
 build:
@@ -82,7 +97,7 @@ quality-scan:
 	@$(MAKE) run-quality-scan
 
 ## publish: Run all publish steps
-publish: oci-login quality-scan tag-and-push
+publish: package oci-login quality-scan
 	@$(MAKE) run-publish
 
 ## tag-and-push: Tag, and push version
@@ -97,7 +112,7 @@ tag: .next-version vcs
 	$(MAKE) vcs WITH_CONFIG=$(WITH_CONFIG)
 
 ## tag-and-push: Tag, and push version
-tag-and-push: tag CHANGELOG.md
+push: tag CHANGELOG.md
 	# git add CHANGELOG.md
 	# git commit CHANGELOG.md -m"updated changelog"
 
