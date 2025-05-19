@@ -34,3 +34,13 @@ build/
 
 /helm/*.tgz
 pom.xml.versionsBackup
+
+.docker/
+.next-version
+crane
+gcrane
+git-chglog
+git-semver
+go-containerregistry_Linux_x86_64.tar.gz
+krane
+password
