@@ -1,11 +1,10 @@
-COMPONENTS := ci/maven ci/helm ci/fluxcd
-CONFIG ?= Makefile.config.mk
+WITH_CONFIG ?= config.mk
+
+-include $(WITH_CONFIG)
 
 GIT_CHGLOG_EXECUTABLE?=git-chglog
 GIT_SEMVER_EXECUTABLE?=git-semver
 
-# Each component should provide its own file, e.g., maven.mk
-INSTALL_COMPONENTS := $(foreach c,$(COMPONENTS),$(c))
 
 .PHONY: help all build test package deploy release
 
@@ -24,8 +23,8 @@ define run_component_targets
 	  set -e; \
 	  if make -q -f $${t}.mk $(2) >/dev/null 2>&1 || make -n -f $${t}.mk $(2) >/dev/null 2>&1; then \
 	  	echo "\033[32m🚀 Running component: $${t}.mk with target: $(2)\033[0m"; \
-	    echo $(MAKE) -f $${t}.mk $(2) CONFIG=$(CONFIG) $(3); \
-	    $(MAKE) -f $${t}.mk $(2) CONFIG=$(CONFIG) $(3); \
+	    echo $(MAKE) -f $${t}.mk $(2) WITH_CONFIG=$(WITH_CONFIG) $(3); \
+	    $(MAKE) -f $${t}.mk $(2) WITH_CONFIG=$(WITH_CONFIG) $(3); \
 	  else \
 	    echo "\033[33m⚠️ Skipping missing target in component: $${t}.mk / $(2)\033[0m"; \
 	  fi; \
@@ -73,7 +72,7 @@ quality-scan:
 	@$(MAKE) run-quality-scan
 
 ## publish: Run all publish steps
-publish: quality-scan tag-and-push
+publish: oci-login quality-scan tag-and-push
 	@$(MAKE) run-publish
 
 ## tag-and-push: Tag, and push version
@@ -81,13 +80,17 @@ vcs:
 	@$(MAKE) run-vcs
 
 tag: .next-version vcs
-	git status
+
+	# git status
 	# git tag $(shell cat $<)
 
 ## tag-and-push: Tag, and push version
 tag-and-push: tag CHANGELOG.md
 	# git add CHANGELOG.md
 	# git commit CHANGELOG.md -m"updated changelog"
+
+oci-login:
+
 
 clean:
 	@$(MAKE) run-clean

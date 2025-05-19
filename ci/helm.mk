@@ -22,11 +22,9 @@ version-apply: $(HELM_DIRS:%=%.version)
 	echo HELM-VERSION $(HELM_DIRS:%=%.version)
 
 %.dependencies:
-	@echo "Updating dependencies for $*"
 	$(HELM_EXECUTABLE) dependency update --skip-refresh $*
 
 %.lint: %.dependencies
-	@echo "Linting Helm chart: $*"
 	$(HELM_EXECUTABLE) lint $(HELM_LINT_FLAGS) $*
 
 %.version:
