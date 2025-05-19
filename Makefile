@@ -1,4 +1,4 @@
-COMPONENTS := ci/helm ci/fluxcd
+COMPONENTS := ci/maven ci/helm ci/fluxcd
 CONFIG ?= Makefile.config.mk
 
 GIT_CHGLOG_EXECUTABLE?=git-chglog
