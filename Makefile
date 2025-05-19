@@ -68,7 +68,7 @@ CHANGELOG.md:
 ## all: Run full pipeline: build + release + deploy
 all: build package
 
-ci: version-apply tag
+ci: version-apply push
 
 ## build: Generate version, apply it, test, and package
 build:
@@ -97,18 +97,19 @@ publish: package oci-login quality-scan
 ## tag-and-push: Tag, and push version
 vcs: .next-version
 	@$(MAKE) run-vcs
-	git commit -a -m"Updated for next verion $(shell cat $<)"
+	git commit -a -m"Updated for next version $(shell cat $<)"
 
 tag: .next-version vcs
-	git tag $(shell cat $<)
+	git tag v$(shell cat $<)
 	$(MAKE) -B .next-version WITH_PRE_RELEASE=true WITH_CONFIG=$(WITH_CONFIG)
 	$(MAKE) version-apply WITH_CONFIG=$(WITH_CONFIG)
 	$(MAKE) vcs WITH_CONFIG=$(WITH_CONFIG)
 
 ## tag-and-push: Tag, and push version
 push: tag CHANGELOG.md
-	# git add CHANGELOG.md
-	# git commit CHANGELOG.md -m"updated changelog"
+	git add CHANGELOG.md
+	git commit CHANGELOG.md -m"updated changelog"
+	git push
 
 oci-login:
 	# exit 1;
