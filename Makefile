@@ -71,7 +71,7 @@ all: build package
 ci: version-apply build package tag pre-release push
 
 VERSION.txt: .next-version
-	$(shell cat $<) > $@
+	echo $(shell cat $<) > $@
 	git add $@
 
 ## build: Generate version, apply it, test, and package

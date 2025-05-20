@@ -2,4 +2,5 @@ crane
 yq
 java
 
-https://github.com/arnaud-deprez/gsemver
+https://github.com/arnaud-deprez/gsemver/releases
+https://github.com/git-chglog/git-chglog/releases
