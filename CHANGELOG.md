@@ -2,15 +2,11 @@
 
 
 ## 1.1.1 - 2025-05-20
-### Fix
-- updated makefile flow
-
-
-## v1.1.0 - 2025-05-20
 ### Chore
 - test
 
 ### Fix
+- updated makefile flow
 - fixes10
 - fixes2
 - fixes2

@@ -13,7 +13,7 @@ ifeq ($(WITH_PRE_RELEASE),true)
   GSEMVER_BUMP_FLAGS := patch --pre-release alpha
 endif
 
-.PHONY: help all build test package deploy release
+.PHONY: help all build test package deploy release CHANGELOG.md
 
 ## help: Show this help
 help:
@@ -110,7 +110,7 @@ tag: .next-version version-apply vcs
 push: tag CHANGELOG.md
 	# git add CHANGELOG.md
 	# git commit CHANGELOG.md -m"updated changelog"
-	git push
+	# git push
 
 oci-login:
 	# exit 1;
