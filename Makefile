@@ -62,8 +62,8 @@ version-generate: .next-version
 
 ## changelog: Compute the next semantic version
 changelog: CHANGELOG.md
-CHANGELOG.md:
-	$(GIT_CHGLOG_EXECUTABLE) --output $@
+CHANGELOG.md: .next-version
+	$(GIT_CHGLOG_EXECUTABLE) --next-tag $(shell cat $<) --output $@
 
 ## all: Run full pipeline: build + release + deploy
 all: build package
@@ -95,7 +95,7 @@ publish: package oci-login quality-scan
 	@$(MAKE) run-publish
 
 ## tag-and-push: Tag, and push version
-vcs: .next-version
+vcs: .next-version CHANGELOG.md
 	@$(MAKE) run-vcs
 	git commit -a -m"Updated for next version $(shell cat $<)"
 
