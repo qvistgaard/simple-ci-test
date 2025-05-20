@@ -1,7 +1,10 @@
 ## Unreleased
 
 
-## 1.1.1-alpha.0 - 0001-01-01
+## 1.1.1 - 2025-05-20
+### Fix
+- updated makefile flow 2
+
 
 ## v1.1.0 - 2025-05-20
 ### Chore
