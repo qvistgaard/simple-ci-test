@@ -99,7 +99,7 @@ vcs: .next-version CHANGELOG.md
 	@$(MAKE) run-vcs
 	git commit -a -m"Updated for next version $(shell cat $<)" || exit 0
 
-tag: version-apply vcs
+tag: .next-version version-apply vcs
 	git tag v$(shell cat $<)
 	# $(MAKE) -B .next-version WITH_PRE_RELEASE=true WITH_CONFIG=$(WITH_CONFIG)
 	# $(MAKE) version-apply WITH_CONFIG=$(WITH_CONFIG)
