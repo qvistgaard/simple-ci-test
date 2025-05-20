@@ -68,7 +68,7 @@ CHANGELOG.md: .next-version
 ## all: Run full pipeline: build + release + deploy
 all: build package
 
-ci: version-apply push
+ci: version-apply build package tag push
 
 ## build: Generate version, apply it, test, and package
 build:
