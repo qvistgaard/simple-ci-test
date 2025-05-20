@@ -10,7 +10,7 @@ GSEMVER_FLAGS=
 GSEMVER_BUMP_FLAGS=
 
 ifeq ($(WITH_PRE_RELEASE),true)
-  GSEMVER_BUMP_FLAGS := patch --pre-release alpha
+  GSEMVER_BUMP_FLAGS += patch --pre-release alpha --pre-release-overwrite
 endif
 
 .PHONY: help all build test package deploy release
