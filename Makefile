@@ -97,7 +97,7 @@ publish: package oci-login quality-scan
 ## tag-and-push: Tag, and push version
 vcs: .next-version CHANGELOG.md
 	@$(MAKE) run-vcs
-	git commit -a -m"Updated for next version $(shell cat $<)" || exit 0
+	git commit -a -m"Updated for next version $(shell cat $<) [skip ci]" || exit 0
 
 tag: .next-version version-apply vcs
 	git tag --force v$(shell cat $<)
@@ -109,6 +109,9 @@ tag: .next-version version-apply vcs
 pre-release:
 	$(MAKE) -B .next-version WITH_PRE_RELEASE=true WITH_CONFIG=$(WITH_CONFIG)
 	$(MAKE) version-apply WITH_CONFIG=$(WITH_CONFIG)
+	$(MAKE) vcs WITH_CONFIG=$(WITH_CONFIG)
+
+
 
 ## tag-and-push: Tag, and push version
 push: tag CHANGELOG.md
