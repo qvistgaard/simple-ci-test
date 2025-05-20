@@ -75,7 +75,7 @@ build:
 	@$(MAKE) run-build
 
 ## version-apply: Apply version to all components
-version-apply:
+version-apply: .next-version
 	@$(MAKE) run-version-apply
 
 ## test: Run tests on all components
@@ -99,7 +99,7 @@ vcs: .next-version CHANGELOG.md
 	@$(MAKE) run-vcs
 	git commit -a -m"Updated for next version $(shell cat $<)" || exit 0
 
-tag: .next-version vcs
+tag: version-apply vcs
 	git tag v$(shell cat $<)
 	# $(MAKE) -B .next-version WITH_PRE_RELEASE=true WITH_CONFIG=$(WITH_CONFIG)
 	# $(MAKE) version-apply WITH_CONFIG=$(WITH_CONFIG)
