@@ -13,7 +13,7 @@ ifeq ($(WITH_PRE_RELEASE),true)
   GSEMVER_BUMP_FLAGS := patch --pre-release alpha
 endif
 
-.PHONY: help all build test package deploy release CHANGELOG.md
+.PHONY: help all build test package deploy release
 
 ## help: Show this help
 help:
