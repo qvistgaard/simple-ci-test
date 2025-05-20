@@ -1,7 +1,12 @@
 ## Unreleased
 
 
-## 1.1.1 - 2025-05-20
+## 1.1.2 - 2025-05-20
+### Fix
+- Update Makefile to handle pre-release overwrite
+
+
+## v1.1.1 - 2025-05-20
 ### Fix
 - updated makefile flow 2
 
