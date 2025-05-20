@@ -101,10 +101,10 @@ vcs: .next-version CHANGELOG.md
 
 tag: .next-version vcs
 	git tag v$(shell cat $<)
-	$(MAKE) -B .next-version WITH_PRE_RELEASE=true WITH_CONFIG=$(WITH_CONFIG)
-	$(MAKE) version-apply WITH_CONFIG=$(WITH_CONFIG)
+	# $(MAKE) -B .next-version WITH_PRE_RELEASE=true WITH_CONFIG=$(WITH_CONFIG)
+	# $(MAKE) version-apply WITH_CONFIG=$(WITH_CONFIG)
 	# $(MAKE) -B CHANGELOG.md WITH_CONFIG=$(WITH_CONFIG)
-	$(MAKE) vcs WITH_CONFIG=$(WITH_CONFIG)
+	# $(MAKE) vcs WITH_CONFIG=$(WITH_CONFIG)
 
 ## tag-and-push: Tag, and push version
 push: tag CHANGELOG.md
