@@ -1,0 +1,96 @@
+format_version: 10
+
+pipelines:
+  release-pipeline:
+    group: release
+    materials:
+      git:
+        git: https://github.com/your-org/your-repo.git
+        branch: main
+        auto_update: true
+
+    stages:
+
+      - name: release-build
+        jobs:
+          - name: build-and-tag
+            tasks:
+              - exec:
+                  command: bash
+                  arguments:
+                    - -c
+                    - |
+                      set -e
+                      git fetch --tags
+
+                      LAST_TAG=$(git tag --sort=-v:refname | grep '^v' | head -n 1 || echo v0.0.0)
+                      VERSION=$(gsemver bump patch $LAST_TAG)
+
+                      echo "Releasing version: $VERSION"
+                      echo $VERSION > .release-version
+
+                      mvn versions:set -DnewVersion=${VERSION#v}
+                      mvn versions:commit
+
+                      git config user.name "GoCD"
+                      git config user.email "ci@example.com"
+
+                      git commit -am "release: $VERSION"
+                      git tag "v$VERSION"
+                      git push origin main
+                      git push origin "v$VERSION"
+
+                      mvn clean package -DskipTests
+              - artifact:
+                  type: build
+                  source: .release-version
+
+      - name: release-publish
+        jobs:
+          - name: publish-artifacts
+            tasks:
+              - fetch:
+                  pipeline: release-pipeline
+                  stage: release-build
+                  job: build-and-tag
+                  source: .release-version
+              - exec:
+                  command: bash
+                  arguments:
+                    - -c
+                    - |
+                      set -e
+                      VERSION=$(cat .release-version)
+                      echo "Publishing version: $VERSION"
+
+                      # retry-safe deploy command
+                      mvn deploy -DskipTests -DretryFailedDeploymentCount=3
+
+      - name: bump-snapshot
+        jobs:
+          - name: bump-to-snapshot
+            tasks:
+              - fetch:
+                  pipeline: release-pipeline
+                  stage: release-build
+                  job: build-and-tag
+                  source: .release-version
+              - exec:
+                  command: bash
+                  arguments:
+                    - -c
+                    - |
+                      set -e
+                      RELEASE_VERSION=$(cat .release-version)
+                      NEXT_VERSION=$(gsemver bump patch $RELEASE_VERSION)
+                      SNAPSHOT="${NEXT_VERSION#v}-SNAPSHOT"
+
+                      echo "Bumping to snapshot: $SNAPSHOT"
+                      mvn versions:set -DnewVersion=$SNAPSHOT
+                      mvn versions:commit
+
+                      git config user.name "GoCD"
+                      git config user.email "ci@example.com"
+
+                      git commit -am "chore: prepare for next development iteration"
+                      git push origin main
