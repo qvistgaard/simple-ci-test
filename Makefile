@@ -100,7 +100,7 @@ vcs: .next-version CHANGELOG.md
 	git commit -a -m"Updated for next version $(shell cat $<)" || exit 0
 
 tag: .next-version version-apply vcs
-	git tag v$(shell cat $<)
+	git tag --force v$(shell cat $<)
 	# $(MAKE) -B .next-version WITH_PRE_RELEASE=true WITH_CONFIG=$(WITH_CONFIG)
 	# $(MAKE) version-apply WITH_CONFIG=$(WITH_CONFIG)
 	# $(MAKE) -B CHANGELOG.md WITH_CONFIG=$(WITH_CONFIG)
