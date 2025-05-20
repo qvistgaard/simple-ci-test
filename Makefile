@@ -68,7 +68,7 @@ CHANGELOG.md: .next-version
 ## all: Run full pipeline: build + release + deploy
 all: build package
 
-ci: version-apply build package tag push
+ci: version-apply build package tag pre-release push
 
 ## build: Generate version, apply it, test, and package
 build:
@@ -105,6 +105,10 @@ tag: .next-version version-apply vcs
 	# $(MAKE) version-apply WITH_CONFIG=$(WITH_CONFIG)
 	# $(MAKE) -B CHANGELOG.md WITH_CONFIG=$(WITH_CONFIG)
 	# $(MAKE) vcs WITH_CONFIG=$(WITH_CONFIG)
+
+pre-release:
+	$(MAKE) -B .next-version WITH_PRE_RELEASE=true WITH_CONFIG=$(WITH_CONFIG)
+	$(MAKE) version-apply WITH_CONFIG=$(WITH_CONFIG)
 
 ## tag-and-push: Tag, and push version
 push: tag CHANGELOG.md
