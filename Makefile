@@ -49,7 +49,7 @@ version-generate: .next-version
 .next-version:
 	@echo "Checking for version changes..."
 	@LATEST_TAG=$$(git tag --sort=-v:refname | grep '^v' | head -n 1 || echo v0.0.0); \
-	NEXT_VERSION=$$(./gsemver bump $(GSEMVER_BUMP_FLAGS)); \
+	NEXT_VERSION=$$($(GSEMVER) bump $(GSEMVER_BUMP_FLAGS)); \
 	echo "Latest Git tag:    $$LATEST_TAG"; \
 	echo "Next candidate:    $$NEXT_VERSION"; \
 	if [ "v$$NEXT_VERSION" = "$$LATEST_TAG" ]; then \
