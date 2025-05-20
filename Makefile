@@ -70,12 +70,16 @@ all: build package
 
 ci: version-apply build package tag pre-release push
 
+VERSION.txt: .next-version
+	$(shell cat $<) > $@
+	git add $@
+
 ## build: Generate version, apply it, test, and package
 build:
 	@$(MAKE) run-build
 
 ## version-apply: Apply version to all components
-version-apply: .next-version
+version-apply: .next-version VERSION.txt
 	@$(MAKE) run-version-apply
 
 ## test: Run tests on all components
@@ -101,10 +105,6 @@ vcs: .next-version
 
 tag: .next-version version-apply CHANGELOG.md vcs
 	git tag --force v$(shell cat $<)
-	# $(MAKE) -B .next-version WITH_PRE_RELEASE=true WITH_CONFIG=$(WITH_CONFIG)
-	# $(MAKE) version-apply WITH_CONFIG=$(WITH_CONFIG)
-	# $(MAKE) -B CHANGELOG.md WITH_CONFIG=$(WITH_CONFIG)
-	# $(MAKE) vcs WITH_CONFIG=$(WITH_CONFIG)
 
 pre-release:
 	$(MAKE) -B .next-version WITH_PRE_RELEASE=true WITH_CONFIG=$(WITH_CONFIG)
@@ -113,10 +113,8 @@ pre-release:
 
 
 ## tag-and-push: Tag, and push version
-push: tag CHANGELOG.md
-	# git add CHANGELOG.md
-	# git commit CHANGELOG.md -m"updated changelog"
-	# git push
+push: tag
+	git push
 
 oci-login:
 	# exit 1;
