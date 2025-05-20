@@ -2,10 +2,10 @@ WITH_CONFIG ?= config.mk
 
 -include $(WITH_CONFIG)
 
-GIT_CHGLOG_EXECUTABLE?=./git-chglog
+GIT_CHGLOG=git-chglog
 GIT_SEMVER_EXECUTABLE?=./git-semver
 
-GSEMVER?=./gsemver
+GSEMVER?=gsemver
 GSEMVER_FLAGS=
 GSEMVER_BUMP_FLAGS=
 
@@ -63,7 +63,7 @@ version-generate: .next-version
 ## changelog: Compute the next semantic version
 changelog: CHANGELOG.md
 CHANGELOG.md: .next-version
-	$(GIT_CHGLOG_EXECUTABLE) --next-tag $(shell cat $<) --output $@
+	$(GIT_CHGLOG) --next-tag $(shell cat $<) --output $@
 
 ## all: Run full pipeline: build + release + deploy
 all: build package
