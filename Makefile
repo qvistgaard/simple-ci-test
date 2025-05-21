@@ -112,7 +112,7 @@ tag: .next-version version-apply CHANGELOG.md vcs
 	git tag --force v$(shell cat $<)
 
 ## tag-and-push: Tag, and push version
-push: tag
+push: .next-version tag
 	git push origin v$(shell cat $<)
 
 oci-login:
