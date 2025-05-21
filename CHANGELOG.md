@@ -1,7 +1,7 @@
 ## Unreleased
 
 
-## 1.1.2+15.82f6788 - 2025-05-21
+## 1.1.2+17.c3f0ebc - 2025-05-21
 ### Feat
 - Add promotion targets to Makefile
 
