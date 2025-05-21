@@ -1,11 +1,16 @@
 ## Unreleased
 
 
-## 1.2.0 - 2025-05-21
+## 1.1.3 - 2025-05-21
 ### Feat
 - Add promotion targets to Makefile
 
 ### Fix
+- JSON syntax in GSEMVER branch strategy argument
+- Makefile by escaping dollar sign in branch strategy
+- Correct JSON escaping in Makefile's branch strategy flag
+- Fix JSON escaping in branch strategy flag in Makefile
+- Adjust pre-release bump flags in Makefile
 - Enable git push by uncommenting the command in Makefile
 - Remove GoCD pipeline configuration.
 - Enable push for promotion branch in Makefile.

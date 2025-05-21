@@ -12,7 +12,9 @@ GSEMVER_BUMP_FLAGS=
 PROMOTION_BRANCH ?= ci/release
 
 ifeq ($(WITH_PRE_RELEASE),true)
-  GSEMVER_BUMP_FLAGS += patch --pre-release alpha --pre-release-overwrite
+	GSEMVER_BUMP_FLAGS += patch --pre-release alpha --pre-release-overwrite
+else
+	GSEMVER_BUMP_FLAGS += --branch-strategy='{"branchesPattern":"^$(PROMOTION_BRANCH)$$","preRelease":false}'
 endif
 
 .PHONY: help all build test package deploy release
@@ -49,6 +51,7 @@ run-%: .next-version
 ## version-generate: Compute the next semantic version
 version-generate: .next-version
 .next-version:
+	echo $(GSEMVER) bump $(GSEMVER_BUMP_FLAGS)
 	@echo "Checking for version changes..."
 	@LATEST_TAG=$$(git tag --sort=-v:refname | grep '^v' | head -n 1 || echo v0.0.0); \
 	NEXT_VERSION=$$($(GSEMVER) bump $(GSEMVER_BUMP_FLAGS)); \
@@ -70,7 +73,7 @@ CHANGELOG.md: .next-version
 ## all: Run full pipeline: build + release + deploy
 all: build package
 
-ci: version-apply build package tag pre-release push
+ci: version-apply build package tag push
 
 VERSION.txt: .next-version
 	echo $(shell cat $<) > $@
@@ -108,30 +111,9 @@ vcs: .next-version
 tag: .next-version version-apply CHANGELOG.md vcs
 	git tag --force v$(shell cat $<)
 
-pre-release:
-	$(MAKE) -B .next-version WITH_PRE_RELEASE=true WITH_CONFIG=$(WITH_CONFIG)
-	$(MAKE) version-apply WITH_CONFIG=$(WITH_CONFIG)
-	$(MAKE) vcs WITH_CONFIG=$(WITH_CONFIG)
-
-promote:
-	git checkout -b $(PROMOTION_BRANCH); \
-	git merge --no-ff master -m "Master was promoted to release"; \
-	git push origin $(PROMOTION_BRANCH)
-
-ci-promote:
-	@echo "🔍 Checking for [skip ci] directive..."
-	@COMMIT_MSG=$$(git log -1 --pretty=%B); \
-	echo "Last commit message: $$COMMIT_MSG"; \
-	if echo "$$COMMIT_MSG" | grep -Eiq '\[(skip ci|ci skip)\]|ci:skip|ci[-_]skip|skip[-_]ci'; then \
-	  echo "🚫 Skipping CI due to commit message directive."; \
-	  exit 0; \
-	fi; \
-	echo "✅ No skip directive. Proceeding with promotion..."; \
-	$(MAKE) promote WITH_CONFIG=$(WITH_CONFIG)
-
 ## tag-and-push: Tag, and push version
 push: tag
-	git push
+	git push origin v$(shell cat $<)
 
 oci-login:
 	# exit 1;
@@ -139,3 +121,4 @@ oci-login:
 clean:
 	@$(MAKE) run-clean
 	rm .next-version
+
