@@ -1,7 +1,25 @@
 ## Unreleased
 
 
-## 1.1.2 - 2025-05-20
+## 1.1.2+13.a97a34b - 2025-05-21
+### Feat
+- Add promotion targets to Makefile
+
+### Fix
+- Enable git push by uncommenting the command in Makefile
+- Remove GoCD pipeline configuration.
+- Enable push for promotion branch in Makefile.
+- Correct promotion branch handling in Makefile
+- Remove trailing blank lines in Makefile
+- Add newline at the end of Makefile
+- Disable `git push` command in Makefile
+- VERSION.txt generation in Makefile target
+- Update Makefile to use GSEMVER variable for version bump
+- Update Makefile to simplify executable variable names
+- Improve version handling and cleanup Makefile
+
+
+## v1.1.2 - 2025-05-20
 ### Fix
 - Update Makefile to handle pre-release overwrite
 
@@ -28,5 +46,3 @@
 - add all
 - added pipeline
 
-
-## 1.0.0 - 2025-05-15
