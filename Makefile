@@ -14,7 +14,7 @@ PROMOTION_BRANCH ?= ci/release
 ifeq ($(WITH_PRE_RELEASE),true)
 	GSEMVER_BUMP_FLAGS += patch --pre-release alpha --pre-release-overwrite
 else
-	GSEMVER_BUMP_FLAGS += --branch-strategy='{\"branchesPattern\":\"^$(PROMOTION_BRANCH)$\",\"preRelease\":false}'
+	GSEMVER_BUMP_FLAGS += --branch-strategy='{\"branchesPattern\":\"^$(PROMOTION_BRANCH)\$\",\"preRelease\":false}'
 endif
 
 .PHONY: help all build test package deploy release
