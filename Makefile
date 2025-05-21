@@ -116,7 +116,7 @@ pre-release:
 promote:
 	git checkout -b $(PROMOTION_BRANCH); \
 	git merge --no-ff master -m "Master was promoted to release"; \
-	# git push origin $(PROMOTION_BRANCH)
+	git push origin $(PROMOTION_BRANCH)
 
 ci-promote:
 	@echo "🔍 Checking for [skip ci] directive..."
