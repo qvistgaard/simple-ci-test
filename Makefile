@@ -51,6 +51,7 @@ run-%: .next-version
 ## version-generate: Compute the next semantic version
 version-generate: .next-version
 .next-version:
+	echo $(GSEMVER) bump $(GSEMVER_BUMP_FLAGS)
 	@echo "Checking for version changes..."
 	@LATEST_TAG=$$(git tag --sort=-v:refname | grep '^v' | head -n 1 || echo v0.0.0); \
 	NEXT_VERSION=$$($(GSEMVER) bump $(GSEMVER_BUMP_FLAGS)); \
