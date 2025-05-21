@@ -131,7 +131,7 @@ ci-promote:
 
 ## tag-and-push: Tag, and push version
 push: tag
-	# git push
+	git push
 
 oci-login:
 	# exit 1;
