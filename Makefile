@@ -114,9 +114,9 @@ pre-release:
 	$(MAKE) vcs WITH_CONFIG=$(WITH_CONFIG)
 
 promote:
-	git checkout $(PROMOTION_BRANCH); \
+	git checkout -b $(PROMOTION_BRANCH); \
 	git merge --no-ff master -m "Master was promoted to release"; \
-	git push origin $(PROMOTION_BRANCH)
+	# git push origin $(PROMOTION_BRANCH)
 
 ci-promote:
 	@echo "🔍 Checking for [skip ci] directive..."
