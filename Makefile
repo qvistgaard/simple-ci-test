@@ -114,7 +114,7 @@ publish: package oci-login quality-scan
 endif
 
 release-branch:
-	git pull origin ci/release
+	git pull --ff-only origin ci/release
 	git checkout -b ci/release
 	git merge -X theirs --no-edit master
 
