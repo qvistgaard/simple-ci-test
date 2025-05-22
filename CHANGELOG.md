@@ -1,11 +1,15 @@
 ## Unreleased
 
 
-## 1.1.3 - 2025-05-21
+## 1.2.0 - 2025-05-22
 ### Feat
 - Add promotion targets to Makefile
 
 ### Fix
+- Add missing git push command in Makefile
+- Add conditional version handling in Makefile targets
+- Remove unused branch strategy from Makefile
+- Add missing newline in Makefile
 - JSON syntax in GSEMVER branch strategy argument
 - Makefile by escaping dollar sign in branch strategy
 - Correct JSON escaping in Makefile's branch strategy flag
@@ -22,6 +26,12 @@
 - Update Makefile to use GSEMVER variable for version bump
 - Update Makefile to simplify executable variable names
 - Improve version handling and cleanup Makefile
+
+### Fix
+- push target dependency in Makefile
+
+### Refactor
+- Simplify CI pipeline by removing pre-release steps
 
 
 ## v1.1.2 - 2025-05-20
