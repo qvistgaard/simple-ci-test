@@ -114,8 +114,8 @@ publish: package oci-login quality-scan
 endif
 
 release-branch:
+	git pull origin ci/release
 	git checkout -b ci/release
-	git pull
 	git merge -X theirs --no-edit master
 
 ## tag-and-push: Tag, and push version
