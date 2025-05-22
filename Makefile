@@ -75,7 +75,7 @@ CHANGELOG.md: .next-version
 ## all: Run full pipeline: build + release + deploy
 all: build package
 
-ci: version-apply build package tag push
+ci: release-branch version-apply build package tag push
 
 VERSION.txt: .next-version
 	echo $(shell cat $<) > $@
@@ -104,12 +104,16 @@ quality-scan:
 ## publish: Run all publish steps
 ifdef WITH_VERSION
 publish:
-	git checkout -f tags/v$(WITH_VERSION)
-	@$(MAKE) publish VERSION=$(WITH_VERSION)
+	# git checkout -f tags/v$(WITH_VERSION)
+	# @$(MAKE) publish VERSION=$(WITH_VERSION)
 else
 publish: package oci-login quality-scan
 	@$(MAKE) run-publish
 endif
+
+release-branch:
+	git checkout -b ci/release
+	git merge -X theirs --no-edit master
 
 ## tag-and-push: Tag, and push version
 vcs: .next-version
@@ -117,6 +121,7 @@ vcs: .next-version
 	git commit -a -m"Updated for next version $(shell cat $<) [skip ci]" || exit 0
 
 tag: .next-version version-apply CHANGELOG.md vcs
+
 	git tag --force v$(shell cat $<)
 
 ## tag-and-push: Tag, and push version
