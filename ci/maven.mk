@@ -33,13 +33,13 @@ endef
 .PHONY: build test clean
 
 build:
-	$(MAVEN_EXECUTABLE) $(MAVEN_FLAGS) compile
+	$(MAVEN) $(MAVEN_FLAGS) compile
 
 test:
-	$(MAVEN_EXECUTABLE) $(MAVEN_FLAGS) test
+	$(MAVEN) $(MAVEN_FLAGS) test
 
 clean:
-	$(MAVEN_EXECUTABLE) clean
+	$(MAVEN) clean
 
 package: package-maven $(addprefix package-,$(JIB_TARGETS))
 
