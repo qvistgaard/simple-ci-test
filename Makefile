@@ -3,18 +3,20 @@ WITH_CONFIG ?= config.mk
 -include $(WITH_CONFIG)
 
 GIT_CHGLOG=git-chglog
-GIT_SEMVER_EXECUTABLE?=./git-semver
 
 GSEMVER?=gsemver
 GSEMVER_FLAGS=
 GSEMVER_BUMP_FLAGS=
 
-PROMOTION_BRANCH ?= ci/release
+CRANE?=crane
+
+RELEASE_BRANCH ?= ci/release
+TRUNK_BRANCH ?= master
 
 ifeq ($(WITH_PRE_RELEASE),true)
 	GSEMVER_BUMP_FLAGS += patch --pre-release alpha --pre-release-overwrite
 else
-	GSEMVER_BUMP_FLAGS += --branch-strategy='{"branchesPattern":"^$(PROMOTION_BRANCH)$$","preRelease":false}'
+	GSEMVER_BUMP_FLAGS += --branch-strategy='{"branchesPattern":"^$(RELEASE_BRANCH)$$","preRelease":false}'
 endif
 
 .PHONY: help all build test package deploy release
@@ -104,7 +106,7 @@ quality-scan:
 	@$(MAKE) run-quality-scan
 
 ## publish: Run all publish steps
-publish: package oci-login quality-scan
+publish: package login quality-scan
 	@$(MAKE) run-publish
 
 publish-version:
@@ -112,16 +114,16 @@ publish-version:
 	@$(MAKE) publish VERSION=$(WITH_VERSION)
 
 release-branch:
-	@echo "🔍 Ensuring branch 'ci/release' exists locally and tracks remote..."
-	@if git ls-remote --exit-code --heads origin ci/release > /dev/null; then \
-		echo "✅ Remote branch 'origin/ci/release' exists. Checking it out..."; \
-		git switch --track origin/ci/release; \
+	@echo "Ensuring branch 'ci/release' exists locally and tracks remote..."
+	@if git ls-remote --exit-code --heads origin $(RELEASE_BRANCH) > /dev/null; then \
+		echo "Remote branch 'origin/ci/release' exists. Checking it out..."; \
+		git switch --track origin/$(RELEASE_BRANCH); \
 	else \
-		echo "🚀 Remote branch does not exist. Creating from current branch..."; \
-		git switch -c ci/release; \
-		git push -u origin ci/release; \
+		echo "Remote branch does not exist. Creating from current branch..."; \
+		git switch -c $(RELEASE_BRANCH); \
+		git push -u origin $(RELEASE_BRANCH); \
 	fi
-	git merge -X theirs --no-edit master
+	git merge -X theirs --no-edit $(TRUNK_BRANCH)
 
 ## tag-and-push: Tag, and push version
 vcs: .next-version
@@ -137,8 +139,15 @@ push: .next-version tag
 	git push origin HEAD
 	git push origin v$(shell cat $<)
 
+login: oci-login
+
 oci-login:
-	# exit 1;
+	@if [ -n "$(DOCKER_USERNAME)" ] && [ -n "$(DOCKER_PASSWORD)" ] && [ -n "$(DOCKER_SERVER)" ]; then \
+		echo "Logging in to Docker with crane..."; \
+		$(CRANE) auth login "$(DOCKER_SERVER)" -u "$(DOCKER_USERNAME)" -p "$(DOCKER_PASSWORD)"; \
+	else \
+		echo "Missing DOCKER credentials. Skipping login."; \
+	fi
 
 clean:
 	@$(MAKE) run-clean
