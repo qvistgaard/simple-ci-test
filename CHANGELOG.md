@@ -1,7 +1,12 @@
 ## Unreleased
 
 
-## 1.2.1 - 2025-05-22
+## 1.2.2 - 2025-05-22
+### Fix
+- Add missing newline at end of Makefile
+
+
+## v1.2.1 - 2025-05-22
 ### Fix
 - Improve logic for release branch creation
 - Enforce fast-forward pulls for release branch creation
