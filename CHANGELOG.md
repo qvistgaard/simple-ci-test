@@ -1,7 +1,12 @@
 ## Unreleased
 
 
-## 1.2.0 - 2025-05-22
+## 1.2.0+1.aca21a8 - 2025-05-22
+### Fix
+- Add `release-branch` target and update CI workflow
+
+
+## v1.2.0 - 2025-05-22
 ### Feat
 - Add promotion targets to Makefile
 
