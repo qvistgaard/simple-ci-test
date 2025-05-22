@@ -1,7 +1,12 @@
 ## Unreleased
 
 
-## 1.2.2 - 2025-05-22
+## 1.2.3 - 2025-05-22
+### Refactor
+- Simplify publish logic and add publish-version target
+
+
+## v1.2.2 - 2025-05-22
 ### Fix
 - Add missing newline at end of Makefile
 
