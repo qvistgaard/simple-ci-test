@@ -104,14 +104,12 @@ quality-scan:
 	@$(MAKE) run-quality-scan
 
 ## publish: Run all publish steps
-ifdef WITH_VERSION
-publish:
-	# git checkout -f tags/v$(WITH_VERSION)
-	# @$(MAKE) publish VERSION=$(WITH_VERSION)
-else
 publish: package oci-login quality-scan
 	@$(MAKE) run-publish
-endif
+
+publish-version:
+	git checkout -f tags/v$(WITH_VERSION)
+	@$(MAKE) publish VERSION=$(WITH_VERSION)
 
 release-branch:
 	@echo "🔍 Ensuring branch 'ci/release' exists locally and tracks remote..."
