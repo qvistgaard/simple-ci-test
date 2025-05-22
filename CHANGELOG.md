@@ -1,7 +1,16 @@
 ## Unreleased
 
 
-## 1.2.0+1.aca21a8 - 2025-05-22
+## 1.2.1 - 2025-05-22
+### Fix
+- Improve logic for release branch creation
+- Enforce fast-forward pulls for release branch creation
+- Update release-branch target for proper remote sync
+- Add 'git pull' to release-branch target in Makefile
+- Update Makefile to handle branch-specific bump flags
+
+
+## v1.2.0+1.aca21a8 - 2025-05-22
 ### Fix
 - Add `release-branch` target and update CI workflow
 
