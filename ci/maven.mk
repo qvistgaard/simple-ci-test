@@ -2,12 +2,16 @@ WITH_CONFIG ?= config.mk
 
 -include $(WITH_CONFIG)
 
+SONAR_URL ?=
+SONAR_TOKEN ?=
+
 MAVEN_WRAPPER_SCRIPT ?= ./mvnw
 MAVEN_FLAGS ?= --batch-mode
 
 MAVEN_JIB_USE_ROOT ?= false
 MAVEN_JIB_MODULES ?=
 
+CRANE ?= crane
 CRANE_FLAGS ?=
 
 ifeq ($(MAVEN_JIB_USE_ROOT),true)
@@ -17,13 +21,9 @@ else
 endif
 
 ifeq ($(wildcard $(MAVEN_WRAPPER_SCRIPT)),)
-	MAVEN_EXECUTABLE ?= $(shell which mvn)
+	MAVEN ?= $(shell which mvn)
 else
-	MAVEN_EXECUTABLE ?= $(MAVEN_WRAPPER_SCRIPT)
-endif
-
-ifdef CRANE_AUTH
-  # CRANE_FLAGS += --auth=$(CRANE_AUTH)
+	MAVEN ?= $(MAVEN_WRAPPER_SCRIPT)
 endif
 
 define tarball_path
@@ -44,22 +44,31 @@ clean:
 package: package-maven $(addprefix package-,$(JIB_TARGETS))
 
 package-%:
-	$(MAVEN_EXECUTABLE) $(MAVEN_FLAGS) jib:buildTar
+	$(MAVEN) $(MAVEN_FLAGS) jib:buildTar
 
 package-maven:
-	$(MAVEN_EXECUTABLE) $(MAVEN_FLAGS) -DskipTests package
+	$(MAVEN) $(MAVEN_FLAGS) -DskipTests package
 
 # Push tarball using crane
 publish-%:
-	./crane push $(CRANE_FLAGS) $(call tarball_path,$*) $(OCI_IMAGE_REPOSITORY)/$*:$(VERSION)
+	@if [ -n "$(IMAGE_REPOSITORY)" ]; then \
+		$(CRANE) push $(CRANE_FLAGS) $(call tarball_path,$*) $(IMAGE_REPOSITORY)/$*:$(VERSION); \
+	else \
+		echo "Skipping pushing docker image. no repository configured"; \
+	fi
 
 publish: $(addprefix publish-,$(JIB_TARGETS))
 
 quality-scan:
-	# $(MAVEN_EXECUTABLE) $(MAVEN_FLAGS)  sonar:sonar -Dsonar.host.url=$(sonarqube-url) -Dsonar.token=$(sonarqube-token)
+	@if [ -n "$(SONAR_URL)" ] && [ -n "$(SONAR_TOKEN)" ]; then \
+		$(MAVEN) $(MAVEN_FLAGS)  sonar:sonar -Dsonar.host.url=$(SONAR_URL) -Dsonar.token=$(SONAR_TOKEN); \
+	else \
+		echo "Skipping sonarqube analysis."; \
+	fi
+
 
 version-apply:
-	$(MAVEN_EXECUTABLE) versions:set -DnewVersion=$(VERSION)
+	$(MAVEN) versions:set -DnewVersion=$(VERSION)
 
 vcs:
 	@grep -Fxq "pom.xml.versionsBackup" .gitignore || { \
