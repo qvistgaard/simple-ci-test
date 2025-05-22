@@ -49,6 +49,9 @@ run-%: .next-version
 ## version-generate: Compute the next semantic version
 version-generate: .next-version
 .next-version:
+ifdef VERSION
+	echo "$(VERSION)" > $@
+else
 	echo $(GSEMVER) bump $(GSEMVER_BUMP_FLAGS)
 	@echo "Checking for version changes..."
 	@LATEST_TAG=$$(git tag --sort=-v:refname | grep '^v' | head -n 1 || echo v0.0.0); \
@@ -62,6 +65,7 @@ version-generate: .next-version
 	  echo "✅ Version bump detected: $$NEXT_VERSION"; \
 	  echo $$NEXT_VERSION > $@; \
 	fi
+endif
 
 ## changelog: Compute the next semantic version
 changelog: CHANGELOG.md
@@ -98,8 +102,14 @@ quality-scan:
 	@$(MAKE) run-quality-scan
 
 ## publish: Run all publish steps
+ifdef WITH_VERSION
+publish:
+	git checkout -f tags/v$(WITH_VERSION)
+	@$(MAKE) publish VERSION=$(WITH_VERSION)
+else
 publish: package oci-login quality-scan
 	@$(MAKE) run-publish
+endif
 
 ## tag-and-push: Tag, and push version
 vcs: .next-version
