@@ -121,6 +121,7 @@ tag: .next-version version-apply CHANGELOG.md vcs
 
 ## tag-and-push: Tag, and push version
 push: .next-version tag
+	git push origin HEAD
 	git push origin v$(shell cat $<)
 
 oci-login:
