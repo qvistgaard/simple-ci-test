@@ -114,8 +114,15 @@ publish: package oci-login quality-scan
 endif
 
 release-branch:
-	git pull --ff-only origin ci/release
-	git checkout -b ci/release
+	@echo "🔍 Ensuring branch 'ci/release' exists locally and tracks remote..."
+	@if git ls-remote --exit-code --heads origin ci/release > /dev/null; then \
+		echo "✅ Remote branch 'origin/ci/release' exists. Checking it out..."; \
+		git switch --track origin/ci/release; \
+	else \
+		echo "🚀 Remote branch does not exist. Creating from current branch..."; \
+		git switch -c ci/release; \
+		git push -u origin ci/release; \
+	fi
 	git merge -X theirs --no-edit master
 
 ## tag-and-push: Tag, and push version
