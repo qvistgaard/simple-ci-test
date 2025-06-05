@@ -1,7 +1,9 @@
 ## Unreleased
 
 
-## 1.2.4 - 2025-05-22
+## 1.2.5 - 0001-01-01
+
+## v1.2.4 - 2025-05-22
 ### Fix
 - Simplify Maven variable usage in ci/maven.mk
 
