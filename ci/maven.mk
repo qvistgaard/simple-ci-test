@@ -39,7 +39,7 @@ test:
 	$(MAVEN) $(MAVEN_FLAGS) test
 
 clean:
-	$(MAVEN) clean
+	$(MAVEN) $(MAVEN_FLAGS) clean
 
 package: package-maven $(addprefix package-,$(JIB_TARGETS))
 
@@ -68,7 +68,7 @@ quality-scan:
 
 
 version-apply:
-	$(MAVEN) versions:set -DnewVersion=$(VERSION)
+	$(MAVEN) $(MAVEN_FLAGS) versions:set -DnewVersion=$(VERSION)
 
 vcs:
 	@grep -Fxq "pom.xml.versionsBackup" .gitignore || { \
