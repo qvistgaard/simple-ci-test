@@ -1,7 +1,12 @@
 ## Unreleased
 
 
-## 1.2.5 - 0001-01-01
+## 1.2.6 - 2025-06-05
+### Fix
+- added missing maven flags to all maven invocations
+
+
+## v1.2.5 - 2025-06-05
 
 ## v1.2.4 - 2025-05-22
 ### Fix

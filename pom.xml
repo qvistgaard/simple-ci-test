@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.source2sea</groupId>
     <artifactId>simple-ci</artifactId>
-    <version>1.2.5</version>
+    <version>1.2.6</version>
     <name>simple-ci</name>
     <description>simple-ci</description>
     <url/>
