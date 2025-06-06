@@ -116,7 +116,7 @@ next-version: .next-version
 .next-version:
 	@echo "🔍 Checking for version changes..."
 	@$(GIT) fetch --tags
-	LATEST_TAG=$$($(GIT) tag --sort=-v:refname | grep '^v' | head -n 1); \
+	LATEST_TAG=$(git tag --sort=-v:refname | grep -m1 '^v'); \
 	[ -z "$$LATEST_TAG" ] && LATEST_TAG="v0.0.0"; \
 	NEXT_VERSION=$$($(GSEMVER) bump $(GSEMVER_BUMP_FLAGS)); \
 	echo "🏷️ Latest Git tag:    $$LATEST_TAG"; \
