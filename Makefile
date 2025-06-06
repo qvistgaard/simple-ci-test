@@ -56,6 +56,9 @@ ci-release: git-ensure-branch
 	$(GIT) merge -X theirs --no-edit origin/master
 	@$(MAKE) run-version-apply run-quality-scan run-package changelog git-commit
 
+ci-publish:
+	@$(MAKE) run-publish
+
 clean:
 	@$(MAKE) run-clean
 	rm .next-version
@@ -115,7 +118,7 @@ next-version: .next-version
 	@$(GIT) fetch --tags
 	@LATEST_TAG=$$(git tag --sort=-v:refname | grep '^v' | head -n 1); \
 		[ -z "$$LATEST_TAG" ] && LATEST_TAG="v0.0.0"; \
-	NEXT_VERSION=$$($(GSEMVER) bump -$(GSEMVER_BUMP_FLAGS)); \
+	NEXT_VERSION=$$($(GSEMVER) bump $(GSEMVER_BUMP_FLAGS)); \
 	echo "🏷️ Latest Git tag:    $$LATEST_TAG"; \
 	echo "📈 Next candidate:     $$NEXT_VERSION"; \
 	if [ "v$$NEXT_VERSION" = "$$LATEST_TAG" ]; then \
