@@ -1,7 +1,12 @@
 ## Unreleased
 
 
-## 1.2.11 - 2025-06-06
+## 1.2.12 - 2025-06-06
+### Fix
+- Disable Jib plugin execution block in pom.xml
+
+
+## v1.2.11 - 2025-06-06
 ### Fix
 - missing `@` in Makefile for fetching latest git tag
 - Update Makefile to improve CI release process
