@@ -52,7 +52,7 @@
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <version>3.4.5</version>
-                <executions>
+<!--                <executions>
                     <execution>
                         <id>build-image-tarball</id>
                         <phase>package</phase>
@@ -60,7 +60,7 @@
                             <goal>buildTar</goal>
                         </goals>
                     </execution>
-                </executions>
+                </executions>-->
                 <configuration>
                     <to>
                         <image>mycompany/my-spring-app</image> <!-- customize as needed -->
