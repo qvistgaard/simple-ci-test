@@ -16,8 +16,8 @@ TRUNK_BRANCH ?= master
 ENVIRONMENTS ?= test staging production
 
 GIT ?= git
-GIT_USER_NAME ?=
-GIT_USER_EMAIL ?=
+GIT_USER_NAME ?=Source2Sea CI/CD
+GIT_USER_EMAIL ?=ci@source2sea.com
 GIT_CREDENTIALS ?=
 
 
@@ -28,8 +28,8 @@ else
 endif
 
 
-
-.SHELLFLAGS := -eu -o pipefail -c
+SHELL := /bin/bash
+.SHELLFLAGS := -euo pipefail -c
 
 
 
@@ -52,15 +52,16 @@ endef
 
 
 ci-release: git-ensure-branch
-	@$(MAKE) run-version-apply run-package run-quality-scan
+	$(GIT) merge -X theirs --no-edit master
+	$(MAKE) run-version-apply run-package run-quality-scan
 
 
 git-config:
-	git config --global --add safe.directory /workspace/source/source-code
-	git config credential.helper "store --file=$(GIT_CREDENTIALS)"
-	git config user.email "gocd@source2sea.com"
-	git config user.name "GoCD @ Sourcv2Sea"
-	git checkout -B master origin/master
+	$(GIT) config --global --add safe.directory /workspace/source/source-code
+	$(GIT) config credential.helper "store --file=$(GIT_CREDENTIALS)"
+	$(GIT) config user.email "$(GIT_USER_EMAIL)"
+	$(GIT) config user.name "$(GIT_USER_NAME)"
+
 
 git-check-clean: git-config
 	@if ! $(GIT) diff --quiet || ! $(GIT) diff --cached --quiet || [ -n "$$($(GIT) ls-files --others --exclude-standard)" ]; then \
@@ -68,31 +69,37 @@ git-check-clean: git-config
 		git status; \
 		exit 1; \
 	else \
-		echo "✅ Working directory is clean."; \
+		echo "✅  Working directory is clean."; \
 	fi
 
 git-ensure-branch: git-check-clean
 	@echo "🔍 Ensuring branch '$(RELEASE_BRANCH)' exists locally and tracks remote..."
-	@if $(GIT) ls-remote --exit-code --heads origin $(RELEASE_BRANCH) > /dev/null; then \
-		echo "✅ Remote branch 'origin/$(RELEASE_BRANCH)' exists. Checking it out..."; \
-		$(GIT) fetch --no-tags origin $(RELEASE_BRANCH):refs/remotes/origin/$(RELEASE_BRANCH); \
-		$(GIT) switch --track origin$(RELEASE_BRANCH); \
-	else; \
+	@if git ls-remote --exit-code --heads origin $(RELEASE_BRANCH) > /dev/null; then \
+		echo "✅  Remote branch 'origin/$(RELEASE_BRANCH)' exists."; \
+		git fetch --no-tags origin $(RELEASE_BRANCH):refs/remotes/origin/$(RELEASE_BRANCH); \
+		if git rev-parse --verify $(RELEASE_BRANCH) > /dev/null 2>&1; then \
+			echo "🔁 Local branch '$(RELEASE_BRANCH)' already exists. Switching..."; \
+			git switch $(RELEASE_BRANCH); \
+		else \
+			echo "📥 Creating local tracking branch from origin/$(RELEASE_BRANCH)..."; \
+			git switch --track origin/$(RELEASE_BRANCH); \
+		fi; \
+	else \
 		echo "🔧 Remote branch does not exist. Creating from current branch..."; \
-		$(GIT) switch -c $(RELEASE_BRANCH); \
+		git switch -c $(RELEASE_BRANCH); \
 		echo "📤 Pushing new branch to remote and setting upstream..."; \
-		$(GIT) push -u origin $(RELEASE_BRANCH); \
+		git push -u origin $(RELEASE_BRANCH); \
 	fi
 
 next-version: .next-version
 
 .next-version:
-	@echo "🔍 Checking for version changes..."; \
+	echo "🔍 Checking for version changes..."; \
 	LATEST_TAG=$$($(GIT) tag --sort=-v:refname | grep '^v' | head -n 1 || echo v0.0.0); \
 	NEXT_VERSION=$$($(GSEMVER) bump --branch-strategy='{"branchesPattern":"^ci/release$$","preRelease":false}'); \
-	@echo "🏷️  Latest Git tag:    $$LATEST_TAG"; \
-	@echo "📈 Next candidate:     $$NEXT_VERSION"; \
-	@if [ "v$$NEXT_VERSION" = "$$LATEST_TAG" ]; then \
+	echo "🏷️  Latest Git tag:    $$LATEST_TAG"; \
+	echo "📈 Next candidate:     $$NEXT_VERSION"; \
+	if [ "v$$NEXT_VERSION" = "$$LATEST_TAG" ]; then \
 		echo "❌ No version bump detected. Nothing to release."; \
 		exit 1; \
 	else \
