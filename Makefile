@@ -51,7 +51,7 @@ endef
 
 ci-release: git-ensure-branch
 	$(GIT) merge -X theirs --no-edit origin/master
-	@$(MAKE) run-version-apply run-package run-quality-scan
+	@$(MAKE) run-version-apply run-quality-scan run-package changelog git-commit
 
 clean:
 	@$(MAKE) run-clean
@@ -93,6 +93,18 @@ git-ensure-branch: git-check-clean
 		git push -u origin $(RELEASE_BRANCH); \
 	fi
 
+git-commit: .next-version
+	@$(MAKE) run-vcs
+	git commit -a -m"Updated for next version $(shell cat $<) [skip ci]" || exit 0
+
+git-tag: .next-version
+	git tag --force v$(shell cat $<)
+
+## tag-and-push: Tag, and push version
+git-push: .next-version git-tag
+	git push origin HEAD
+	git push origin v$(shell cat $<)
+
 next-version: .next-version
 
 .next-version:
@@ -108,7 +120,20 @@ next-version: .next-version
 	else \
 		echo "✅ Version bump detected: $$NEXT_VERSION"; \
 		echo "$$NEXT_VERSION" > $@; \
-		echo "📝 Wrote version to VERSION.txt"; \
+		echo "📝 Wrote version to $@"; \
+	fi
+
+changelog: CHANGELOG.md
+
+CHANGELOG.md: .next-version
+	$(GIT_CHGLOG) --next-tag $(shell cat $<) --output $@
+	@if ! git diff --quiet --cached -- CHANGELOG.md; then \
+		echo "📦 CHANGELOG.md already staged."; \
+	elif git diff --quiet -- CHANGELOG.md; then \
+		echo "✅ CHANGELOG.md unchanged."; \
+	else \
+		echo "➕ Adding CHANGELOG.md to Git..."; \
+		git add CHANGELOG.md; \
 	fi
 
 run-%: .next-version
