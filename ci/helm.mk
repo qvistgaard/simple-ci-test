@@ -1,4 +1,4 @@
-HELM_BASEDIR:=helm
+HELM_BASEDIR?=helm
 HELM_DIRS := $(patsubst %/,%,$(filter %/,$(wildcard $(HELM_BASEDIR)/*/)))
 HELM_LINT_FLAGS?=
 HELM_EXECUTABLE?=helm
