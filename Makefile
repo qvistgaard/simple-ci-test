@@ -52,7 +52,7 @@ endef
 
 
 ci-release: git-ensure-branch
-	$(GIT) merge -X theirs --no-edit master
+	$(GIT) merge -X theirs --no-edit origin/master
 	$(MAKE) run-version-apply run-package run-quality-scan
 
 
