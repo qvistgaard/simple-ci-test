@@ -72,12 +72,12 @@ git-check-clean: git-config
 	fi
 
 git-ensure-branch: git-check-clean
-	@echo "🔍 Ensuring branch '$(RELEASE_BRANCH)' exists locally and tracks remote..."; \
+	@echo "🔍 Ensuring branch '$(RELEASE_BRANCH)' exists locally and tracks remote..."
 	@if $(GIT) ls-remote --exit-code --heads origin $(RELEASE_BRANCH) > /dev/null; then \
 		echo "✅ Remote branch 'origin/$(RELEASE_BRANCH)' exists. Checking it out..."; \
 		$(GIT) fetch --no-tags origin $(RELEASE_BRANCH):refs/remotes/origin/$(RELEASE_BRANCH); \
 		$(GIT) switch --track origin$(RELEASE_BRANCH); \
-	else \
+	else; \
 		echo "🔧 Remote branch does not exist. Creating from current branch..."; \
 		$(GIT) switch -c $(RELEASE_BRANCH); \
 		echo "📤 Pushing new branch to remote and setting upstream..."; \
