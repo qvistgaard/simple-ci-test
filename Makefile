@@ -11,7 +11,15 @@ GSEMVER_BUMP_FLAGS=
 CRANE?=crane
 
 RELEASE_BRANCH ?= ci/release
+DEPLOY_BRANCH ?= ci/deploy
 TRUNK_BRANCH ?= master
+ENVIRONMENTS ?= test staging production
+
+GIT ?= git
+GIT_USER_NAME ?=
+GIT_USER_EMAIL ?=
+GIT_CREDENTIALS ?=
+
 
 ifeq ($(WITH_PRE_RELEASE),true)
 	GSEMVER_BUMP_FLAGS += patch --pre-release alpha --pre-release-overwrite
@@ -19,17 +27,12 @@ else
 	GSEMVER_BUMP_FLAGS += --branch-strategy='{"branchesPattern":"^$(RELEASE_BRANCH)$$","preRelease":false}'
 endif
 
-.PHONY: help all build test package deploy release
 
-## help: Show this help
-help:
-	@echo ""
-	@echo "🛠  Available Targets:"
-	@echo ""
-	@grep -E '^## [a-zA-Z0-9_-]+:' $(MAKEFILE_LIST) | \
-		sort | \
-		awk 'BEGIN {FS = ":.*## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
-	@echo ""
+
+.SHELLFLAGS := -eu -o pipefail -c
+
+
+
 
 define run_component_targets
 	@for t in $(1); do \
@@ -44,112 +47,60 @@ define run_component_targets
 	done
 endef
 
+.PHONY: run-% next-version git-ensure-branch git-check-clean git-config release
 
 
-.PHONY: run-%
+
+ci-release: git-ensure-branch
+	@$(MAKE) run-version-apply run-package run-quality-scan
+
+
+git-config:
+	git config --global --add safe.directory /workspace/source/source-code
+	git config credential.helper "store --file=$(GIT_CREDENTIALS)"
+	git config user.email "gocd@source2sea.com"
+	git config user.name "GoCD @ Sourcv2Sea"
+	git checkout -B master origin/master
+
+git-check-clean: git-config
+	@if ! $(GIT) diff --quiet || ! $(GIT) diff --cached --quiet || [ -n "$$($(GIT) ls-files --others --exclude-standard)" ]; then \
+		echo "❌ Working directory is not clean. Please commit or stash changes."; \
+		git status; \
+		exit 1; \
+	else \
+		echo "✅ Working directory is clean."; \
+	fi
+
+git-ensure-branch: git-check-clean
+	echo "🔍 Ensuring branch '$$RELEASE_BRANCH' exists locally and tracks remote..."; \
+	if $(GIT) ls-remote --exit-code --heads origin $$RELEASE_BRANCH > /dev/null; then \
+		echo "✅ Remote branch 'origin/$$RELEASE_BRANCH' exists. Checking it out..."; \
+		$(GIT) fetch --no-tags origin $$RELEASE_BRANCH:refs/remotes/origin/$$RELEASE_BRANCH; \
+		$(GIT) switch --track origin/$$RELEASE_BRANCH; \
+	else \
+		echo "🔧 Remote branch does not exist. Creating from current branch..."; \
+		$(GIT) switch -c $$RELEASE_BRANCH; \
+		echo "📤 Pushing new branch to remote and setting upstream..."; \
+		$(GIT) push -u origin $$RELEASE_BRANCH; \
+	fi
+
+next-version: .next-version
+
+.next-version:
+	@echo "🔍 Checking for version changes..."; \
+	LATEST_TAG=$$($(GIT) tag --sort=-v:refname | grep '^v' | head -n 1 || echo v0.0.0); \
+	NEXT_VERSION=$$($(GSEMVER) bump --branch-strategy='{"branchesPattern":"^ci/release$$","preRelease":false}'); \
+	echo "🏷️  Latest Git tag:    $$LATEST_TAG"; \
+	echo "📈 Next candidate:     $$NEXT_VERSION"; \
+	if [ "v$$NEXT_VERSION" = "$$LATEST_TAG" ]; then \
+		echo "❌ No version bump detected. Nothing to release."; \
+		exit 1; \
+	else \
+		echo "✅ Version bump detected: $$NEXT_VERSION"; \
+		echo "$$NEXT_VERSION" > $@; \
+		echo "📝 Wrote version to VERSION.txt"; \
+	fi
+
+
 run-%: .next-version
 	$(call run_component_targets,$(foreach c,$(COMPONENTS),$(c)),$*,VERSION=$(shell cat $?))
-
-## version-generate: Compute the next semantic version
-version-generate: .next-version
-.next-version:
-ifdef VERSION
-	echo "$(VERSION)" > $@
-else
-	echo $(GSEMVER) bump $(GSEMVER_BUMP_FLAGS)
-	@echo "Checking for version changes..."
-	@LATEST_TAG=$$(git tag --sort=-v:refname | grep '^v' | head -n 1 || echo v0.0.0); \
-	NEXT_VERSION=$$($(GSEMVER) bump $(GSEMVER_BUMP_FLAGS)); \
-	echo "Latest Git tag:    $$LATEST_TAG"; \
-	echo "Next candidate:    $$NEXT_VERSION"; \
-	if [ "v$$NEXT_VERSION" = "$$LATEST_TAG" ]; then \
-	  echo "❌ No version bump detected. Nothing to release."; \
-	  exit 1; \
-	else \
-	  echo "✅ Version bump detected: $$NEXT_VERSION"; \
-	  echo $$NEXT_VERSION > $@; \
-	fi
-endif
-
-## changelog: Compute the next semantic version
-changelog: CHANGELOG.md
-CHANGELOG.md: .next-version
-	$(GIT_CHGLOG) --next-tag $(shell cat $<) --output $@
-
-## all: Run full pipeline: build + release + deploy
-all: build package
-
-ci: release-branch version-apply build package tag push
-
-VERSION.txt: .next-version
-	echo $(shell cat $<) > $@
-	git add $@
-
-## build: Generate version, apply it, test, and package
-build:
-	@$(MAKE) run-build
-
-## version-apply: Apply version to all components
-version-apply: .next-version VERSION.txt
-	@$(MAKE) run-version-apply
-
-## test: Run tests on all components
-test: build
-	@$(MAKE) run-test
-
-## package: Run Maven packaging
-package: test
-	@$(MAKE) run-package
-
-## quality-scan: Run quality analysis on all components
-quality-scan:
-	@$(MAKE) run-quality-scan
-
-## publish: Run all publish steps
-publish: package login quality-scan
-	@$(MAKE) run-publish
-
-publish-version:
-	git checkout -f tags/v$(WITH_VERSION)
-	@$(MAKE) publish VERSION=$(WITH_VERSION)
-
-release-branch:
-	@echo "Ensuring branch 'ci/release' exists locally and tracks remote..."
-	@if git ls-remote --exit-code --heads origin $(RELEASE_BRANCH) > /dev/null; then \
-		echo "Remote branch 'origin/ci/release' exists. Checking it out..."; \
-		git switch --track origin/$(RELEASE_BRANCH); \
-	else \
-		echo "Remote branch does not exist. Creating from current branch..."; \
-		git switch -c $(RELEASE_BRANCH); \
-		git push -u origin $(RELEASE_BRANCH); \
-	fi
-	git merge -X theirs --no-edit $(TRUNK_BRANCH)
-
-## tag-and-push: Tag, and push version
-vcs: .next-version
-	@$(MAKE) run-vcs
-	git commit -a -m"Updated for next version $(shell cat $<) [skip ci]" || exit 0
-
-tag: .next-version version-apply CHANGELOG.md vcs
-
-	git tag --force v$(shell cat $<)
-
-## tag-and-push: Tag, and push version
-push: .next-version tag
-	git push origin HEAD
-	git push origin v$(shell cat $<)
-
-login: oci-login
-
-oci-login:
-	@if [ -n "$(DOCKER_USERNAME)" ] && [ -n "$(DOCKER_PASSWORD)" ] && [ -n "$(DOCKER_SERVER)" ]; then \
-		echo "Logging in to Docker with crane..."; \
-		$(CRANE) auth login "$(DOCKER_SERVER)" -u "$(DOCKER_USERNAME)" -p "$(DOCKER_PASSWORD)"; \
-	else \
-		echo "Missing DOCKER credentials. Skipping login."; \
-	fi
-
-clean:
-	@$(MAKE) run-clean
-	rm .next-version
-
