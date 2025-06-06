@@ -1,7 +1,30 @@
 ## Unreleased
 
 
-## 1.2.10 - 0001-01-01
+## 1.2.11 - 2025-06-06
+### Fix
+- missing `@` in Makefile for fetching latest git tag
+- Update Makefile to improve CI release process
+- Update FluxCD deployment logic to support multiple environments
+- Simplify tag retrieval in Makefile script.
+- Refactor .next-version tag initialization in Makefile
+- Set HELM_BASEDIR as a configurable variable
+- Makefile variable assignment issue in .next-version target
+- Fix typo in Makefile's Git command syntax
+- Add 'ci-publish' target and fix version bump command
+- Refactor build scripts for better flag management
+- Update Makefile to enhance CI release and versioning workflow
+- Add `clean` target and improve Makefile format consistency
+- Update merge base to origin/master in ci-release target
+- Update Makefile for improved CI/CD workflows and git handling
+- Refactor Makefile for improved variable handling and output.
+- Refactor Makefile to improve CI/CD workflows and structure
+
+### Fix
+- syntax errors in Makefile's git-ensure-branch rule
+
+
+## v1.2.10 - 2025-06-06
 
 ## v1.2.9 - 2025-06-06
 
