@@ -4,9 +4,16 @@ WITH_CONFIG ?= config.mk
 
 GIT_CHGLOG=git-chglog
 
+
 GSEMVER?=gsemver
 GSEMVER_FLAGS=
 GSEMVER_BUMP_FLAGS=
+ifeq ($(WITH_PRE_RELEASE),true)
+	GSEMVER_BUMP_FLAGS += patch --pre-release alpha --pre-release-overwrite
+else
+	GSEMVER_BUMP_FLAGS += --branch-strategy='{"branchesPattern":"^$(RELEASE_BRANCH)$$","preRelease":false}'
+endif
+
 
 CRANE?=crane
 
@@ -21,11 +28,7 @@ GIT_USER_EMAIL ?=ci@source2sea.com
 GIT_CREDENTIALS ?=
 
 
-ifeq ($(WITH_PRE_RELEASE),true)
-	GSEMVER_BUMP_FLAGS += patch --pre-release alpha --pre-release-overwrite
-else
-	GSEMVER_BUMP_FLAGS += --branch-strategy='{"branchesPattern":"^$(RELEASE_BRANCH)$$","preRelease":false}'
-endif
+
 
 
 SHELL := /bin/bash
@@ -38,11 +41,11 @@ define run_component_targets
 	@for t in $(1); do \
 	  set -e; \
 	  if make -q -f $${t}.mk $(2) >/dev/null 2>&1 || make -n -f $${t}.mk $(2) >/dev/null 2>&1; then \
-	  	echo "\033[32m🚀 Running component: $${t}.mk with target: $(2)\033[0m"; \
+	  	echo "🚀 Running component: $${t}.mk with target: $(2)"; \
 	    echo $(MAKE) -f $${t}.mk $(2) WITH_CONFIG=$(WITH_CONFIG) $(3); \
 	    $(MAKE) -f $${t}.mk $(2) WITH_CONFIG=$(WITH_CONFIG) $(3); \
 	  else \
-	    echo "\033[33m⚠️ Skipping missing target in component: $${t}.mk / $(2)\033[0m"; \
+	    echo "⚠️ Skipping missing target in component: $${t}.mk / $(2)"; \
 	  fi; \
 	done
 endef
@@ -110,8 +113,9 @@ next-version: .next-version
 .next-version:
 	@echo "🔍 Checking for version changes..."
 	@$(GIT) fetch --tags
-	@LATEST_TAG=$$($(GIT) tag --sort=-v:refname | grep '^v' | head -n 1 || echo v0.0.0); \
-	NEXT_VERSION=$$($(GSEMVER) bump --branch-strategy='{"branchesPattern":"^ci/release$$","preRelease":false}'); \
+	@LATEST_TAG=$$(git tag --sort=-v:refname | grep '^v' | head -n 1); \
+		[ -z "$$LATEST_TAG" ] && LATEST_TAG="v0.0.0"; \
+	NEXT_VERSION=$$($(GSEMVER) bump -$(GSEMVER_BUMP_FLAGS)); \
 	echo "🏷️ Latest Git tag:    $$LATEST_TAG"; \
 	echo "📈 Next candidate:     $$NEXT_VERSION"; \
 	if [ "v$$NEXT_VERSION" = "$$LATEST_TAG" ]; then \

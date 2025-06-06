@@ -6,7 +6,7 @@ SONAR_URL ?=
 SONAR_TOKEN ?=
 
 MAVEN_WRAPPER_SCRIPT ?= ./mvnw
-MAVEN_FLAGS ?= --batch-mode
+MAVEN_FLAGS ?=
 
 MAVEN_JIB_USE_ROOT ?= false
 MAVEN_JIB_MODULES ?=
@@ -33,21 +33,21 @@ endef
 .PHONY: build test clean
 
 build:
-	$(MAVEN) $(MAVEN_FLAGS) compile
+	$(MAVEN) --batch-mode $(MAVEN_FLAGS) compile
 
 test:
-	$(MAVEN) $(MAVEN_FLAGS) test
+	$(MAVEN) --batch-mode $(MAVEN_FLAGS) test
 
 clean:
-	$(MAVEN) $(MAVEN_FLAGS) clean
+	$(MAVEN) --batch-mode $(MAVEN_FLAGS) clean
 
 package: package-maven $(addprefix package-,$(JIB_TARGETS))
 
 package-%:
-	$(MAVEN) $(MAVEN_FLAGS) jib:buildTar
+	$(MAVEN) --batch-mode $(MAVEN_FLAGS) jib:buildTar
 
 package-maven:
-	$(MAVEN) $(MAVEN_FLAGS) -DskipTests package
+	$(MAVEN) --batch-mode $(MAVEN_FLAGS) -DskipTests package
 
 # Push tarball using crane
 publish-%:
@@ -61,14 +61,14 @@ publish: $(addprefix publish-,$(JIB_TARGETS))
 
 quality-scan:
 	@if [ -n "$(SONAR_URL)" ] && [ -n "$(SONAR_TOKEN)" ]; then \
-		$(MAVEN) $(MAVEN_FLAGS)  sonar:sonar -Dsonar.host.url=$(SONAR_URL) -Dsonar.token=$(SONAR_TOKEN); \
+		$(MAVEN) --batch-mode $(MAVEN_FLAGS) sonar:sonar -Dsonar.host.url=$(SONAR_URL) -Dsonar.token=$(SONAR_TOKEN); \
 	else \
 		echo "Skipping sonarqube analysis."; \
 	fi
 
 
 version-apply:
-	$(MAVEN) $(MAVEN_FLAGS) versions:set -DnewVersion=$(VERSION)
+	$(MAVEN) --batch-mode $(MAVEN_FLAGS) versions:set -DnewVersion=$(VERSION)
 
 vcs:
 	@grep -Fxq "pom.xml.versionsBackup" .gitignore || { \
