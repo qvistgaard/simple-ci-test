@@ -72,16 +72,16 @@ git-check-clean: git-config
 	fi
 
 git-ensure-branch: git-check-clean
-	echo "🔍 Ensuring branch '$$RELEASE_BRANCH' exists locally and tracks remote..."; \
-	if $(GIT) ls-remote --exit-code --heads origin $$RELEASE_BRANCH > /dev/null; then \
-		echo "✅ Remote branch 'origin/$$RELEASE_BRANCH' exists. Checking it out..."; \
-		$(GIT) fetch --no-tags origin $$RELEASE_BRANCH:refs/remotes/origin/$$RELEASE_BRANCH; \
-		$(GIT) switch --track origin/$$RELEASE_BRANCH; \
+	@echo "🔍 Ensuring branch '$(RELEASE_BRANCH)' exists locally and tracks remote..."; \
+	@if $(GIT) ls-remote --exit-code --heads origin $(RELEASE_BRANCH) > /dev/null; then \
+		echo "✅ Remote branch 'origin/$(RELEASE_BRANCH)' exists. Checking it out..."; \
+		$(GIT) fetch --no-tags origin $(RELEASE_BRANCH):refs/remotes/origin/$(RELEASE_BRANCH); \
+		$(GIT) switch --track origin$(RELEASE_BRANCH); \
 	else \
 		echo "🔧 Remote branch does not exist. Creating from current branch..."; \
-		$(GIT) switch -c $$RELEASE_BRANCH; \
+		$(GIT) switch -c $(RELEASE_BRANCH); \
 		echo "📤 Pushing new branch to remote and setting upstream..."; \
-		$(GIT) push -u origin $$RELEASE_BRANCH; \
+		$(GIT) push -u origin $(RELEASE_BRANCH); \
 	fi
 
 next-version: .next-version
@@ -90,9 +90,9 @@ next-version: .next-version
 	@echo "🔍 Checking for version changes..."; \
 	LATEST_TAG=$$($(GIT) tag --sort=-v:refname | grep '^v' | head -n 1 || echo v0.0.0); \
 	NEXT_VERSION=$$($(GSEMVER) bump --branch-strategy='{"branchesPattern":"^ci/release$$","preRelease":false}'); \
-	echo "🏷️  Latest Git tag:    $$LATEST_TAG"; \
-	echo "📈 Next candidate:     $$NEXT_VERSION"; \
-	if [ "v$$NEXT_VERSION" = "$$LATEST_TAG" ]; then \
+	@echo "🏷️  Latest Git tag:    $$LATEST_TAG"; \
+	@echo "📈 Next candidate:     $$NEXT_VERSION"; \
+	@if [ "v$$NEXT_VERSION" = "$$LATEST_TAG" ]; then \
 		echo "❌ No version bump detected. Nothing to release."; \
 		exit 1; \
 	else \
