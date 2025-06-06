@@ -49,11 +49,13 @@ endef
 
 .PHONY: run-% next-version git-ensure-branch git-check-clean git-config release
 
-
-
 ci-release: git-ensure-branch
 	$(GIT) merge -X theirs --no-edit origin/master
-	$(MAKE) run-version-apply run-package run-quality-scan
+	@$(MAKE) run-version-apply run-package run-quality-scan
+
+clean:
+	@$(MAKE) run-clean
+	rm .next-version
 
 
 git-config:
@@ -69,13 +71,13 @@ git-check-clean: git-config
 		git status; \
 		exit 1; \
 	else \
-		echo "✅  Working directory is clean."; \
+		echo "✅ Working directory is clean."; \
 	fi
 
 git-ensure-branch: git-check-clean
 	@echo "🔍 Ensuring branch '$(RELEASE_BRANCH)' exists locally and tracks remote..."
 	@if git ls-remote --exit-code --heads origin $(RELEASE_BRANCH) > /dev/null; then \
-		echo "✅  Remote branch 'origin/$(RELEASE_BRANCH)' exists."; \
+		echo "✅ Remote branch 'origin/$(RELEASE_BRANCH)' exists."; \
 		git fetch --no-tags origin $(RELEASE_BRANCH):refs/remotes/origin/$(RELEASE_BRANCH); \
 		if git rev-parse --verify $(RELEASE_BRANCH) > /dev/null 2>&1; then \
 			echo "🔁 Local branch '$(RELEASE_BRANCH)' already exists. Switching..."; \
@@ -94,10 +96,11 @@ git-ensure-branch: git-check-clean
 next-version: .next-version
 
 .next-version:
-	echo "🔍 Checking for version changes..."; \
-	LATEST_TAG=$$($(GIT) tag --sort=-v:refname | grep '^v' | head -n 1 || echo v0.0.0); \
+	@echo "🔍 Checking for version changes..."
+	@$(GIT) fetch --tags
+	@LATEST_TAG=$$($(GIT) tag --sort=-v:refname | grep '^v' | head -n 1 || echo v0.0.0); \
 	NEXT_VERSION=$$($(GSEMVER) bump --branch-strategy='{"branchesPattern":"^ci/release$$","preRelease":false}'); \
-	echo "🏷️  Latest Git tag:    $$LATEST_TAG"; \
+	echo "🏷️ Latest Git tag:    $$LATEST_TAG"; \
 	echo "📈 Next candidate:     $$NEXT_VERSION"; \
 	if [ "v$$NEXT_VERSION" = "$$LATEST_TAG" ]; then \
 		echo "❌ No version bump detected. Nothing to release."; \
@@ -107,7 +110,6 @@ next-version: .next-version
 		echo "$$NEXT_VERSION" > $@; \
 		echo "📝 Wrote version to VERSION.txt"; \
 	fi
-
 
 run-%: .next-version
 	$(call run_component_targets,$(foreach c,$(COMPONENTS),$(c)),$*,VERSION=$(shell cat $?))
