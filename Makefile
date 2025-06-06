@@ -116,7 +116,7 @@ next-version: .next-version
 .next-version:
 	@echo "🔍 Checking for version changes..."
 	@$(GIT) fetch --tags
-	LATEST_TAG=$$(git tag --sort=-v:refname | grep -m1 '^v'); \
+	@LATEST_TAG=$$(git tag --sort=-v:refname | grep -m1 '^v'); \
 	if [ -z "$$LATEST_TAG" ]; then \
 		LATEST_TAG="v0.0.0"; \
 	fi; \
