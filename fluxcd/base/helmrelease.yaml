@@ -14,5 +14,5 @@ spec:
   install:
     disableWait: true
   upgrade:
-    disableWait: true
+    disableWait: false
   changed: by-relase
