@@ -15,4 +15,4 @@ spec:
     disableWait: true
   upgrade:
     disableWait: true
-  changed: by-relase
+  changed: by-relase-1
